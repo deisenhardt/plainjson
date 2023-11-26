@@ -1,0 +1,23 @@
+#!/bin/ksh
+
+# this is extracted from a production script 
+# and generalized for sharing and usage as a function
+# in other scripts later
+# tested with a single xml file, no promises...
+
+# you can update START_STRING & END_STRING if your json
+# blocks have pattern strings that will give you only the data you want
+# or the first sed can be excluded if you want to evaluate the entire file
+# the process is broken into 3 parts to be broadly applicable
+
+ip=$1
+
+jsonfile=$(ssh $ip 'cat /path/to/file.json')
+
+json1=$(echo "$jsonmap" | tr -d '{}:",' | sed '1,5d')
+
+json2=$(echo "$json1" | sed '/START_STRING/d;/tags/d;s/section//g;s/subSection//g;/END_STRING/d' | sed -e 's/^[ ]*//')
+
+json3=$(printf "$json2" | tr  "\n\n" " " | sed 's/ r/\\nr/g;s/  / /g')
+
+echo "$json3" #>> /path/to/outputfile
